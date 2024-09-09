@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chatroom</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="outer">
+   
+   
+   <div class="heading-div">
+      <h1>Chatsapp</h1>
+      <img src="chatsapp.webp">
+    </div>   
+    <div class="welcome">
+    <h3>Welcome to our chat application</h3>
+    <p>Enter your name and chat with anyone using the same chat application on browser.</p>
+</div>
+
+    <div class="name-div">
+    <input id="nickname" type="text" placeholder="Enter your nickname">
+    <button onclick="setNickname()">Set name</button>
+</div>
+
+
+    <div id="chat"></div>
+
+    <div class="input-div">
+    <input id="messageInput" type="text" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send Message</button>
+</div>
+<script>
+    let nickname = 'Anonymous';  // Default nickname
+    const chatDiv = document.getElementById('chat');
+    const socket = new WebSocket('ws://localhost:8080');
+
+    socket.addEventListener('open', () => {
+        console.log('Connected to WebSocket server');
+    });
+
+    socket.addEventListener('message', event => {
+        const newMessage = document.createElement('div');
+        newMessage.textContent = event.data;
+        chatDiv.appendChild(newMessage);
+        chatDiv.scrollTop = chatDiv.scrollHeight;  // Auto scroll to the latest message
+    });
+
+    // Function to set the nickname and send it to the server
+    function setNickname() {
+        const nicknameInput = document.getElementById('nickname');
+        nickname = nicknameInput.value.trim() || 'Anonymous'; // Get nickname from input
+        nicknameInput.disabled = true;
+        socket.send(`SET_NICKNAME:${nickname}`);  // Send nickname to server
+    }
+
+    // Function to send a message only after the nickname is set
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        if (input.value.trim() !== "") {
+            const message = input.value;
+            socket.send(`MESSAGE:${message}`);
+            input.value = '';  // Clear input field after sending
+        }
+    }
+</script>
+
+    </div>
+</body>
+</html>
